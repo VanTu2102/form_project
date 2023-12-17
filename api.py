@@ -4,6 +4,7 @@ from typing import Any
 import mysql.connector
 from mysql.connector import errorcode
 import uuid
+from datetime import datetime
 
 config = {
     "user": "root",
@@ -195,6 +196,29 @@ class RequestHandler(BaseHTTPRequestHandler):
                 res[row[0]] = {"part": row[1], "question": question}
 
             self._send_response(200, {"data": res})
+        if self.path == "/api/datasurvey":
+            cursor = cnx.cursor()
+            data = cursor.execute(
+                """SELECT * FROM (
+                        SELECT forms.session_id, forms.answer_id, forms.last_updated, answers.answer, answers.value, 			answers.question_id FROM forms JOIN
+                        answers WHERE forms.answer_id = answers.id
+                    ) AS fa
+                    JOIN questions WHERE questions.id = fa.question_id
+            """
+            )
+            res = cursor.fetchall()
+            res_data = []
+            for i in res:
+                e = {
+                    "id": i[1],
+                    "session_id": i[0],
+                    "question": i[7],
+                    "answer": i[3],
+                    "value": i[4],
+                    "update_time":datetime.isoformat(i[2])
+                }
+                res_data.append(e)
+            self._send_response(200, {"data": res_data})
         else:
             self._send_response(404, {"error": "Not Found"})
 
