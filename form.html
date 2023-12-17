@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Form</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+
+<body class="bg-[#6950F5]">
+    <div class="flex flex-col w-full h-full justify-center items-center">
+        <span class="text-white text-[32px] font-[600]">Please fill out the survey below</span>
+        <div id="form">
+
+        </div>
+        <button type="button" class="flex bg-[#0020C6] text-white text-[18px] px-5 py-1 m-3 rounded-[30px] items-center"
+            onclick="submit()">Submit</button>
+        <span class="text-white">Hope you have a nice day</span>
+    </div>
+    <script>
+        let forms = {}
+        function submit() {
+            fetch('http://127.0.0.1:8000/api/post_form', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                mode: 'no-cors',
+                body: JSON.stringify(forms),
+            })
+                .then(response => {
+                    console.log(response)
+                    return response.json()
+                })
+                .then(responseData => {
+                    console.log(responseData);
+                })
+                .catch(error => {
+                    console.error('Fetch error:', error);
+                });
+        }
+        fetch('http://127.0.0.1:8000/api/dataquestion').then(response => {
+            if (!response.ok) {
+                throw new Error(`HTTP error! Status: ${response.status}`);
+            }
+            return response.json();
+        })
+            .then(data => {
+                let parts = data.data
+                Object.keys(parts).forEach((v) => {
+                    let div_part = document.createElement('div')
+                    div_part.setAttribute('id', 'part' + v)
+
+                    let text_part = document.createElement('span')
+                    text_part.textContent = parts[v].part
+                    div_part.appendChild(text_part)
+
+                    let questions = parts[v].question
+                    Object.keys(questions).forEach((e) => {
+                        let div_question = document.createElement('div')
+                        div_question.setAttribute('id', 'question' + v)
+                        div_question.setAttribute('class', 'flex flex-col')
+
+                        let text_question = document.createElement('span')
+                        text_question.textContent = questions[e].question
+                        div_question.appendChild(text_question)
+
+                        let answers = questions[e].answer
+
+                        answers.forEach((answer) => {
+                            const input = document.createElement('input');
+                            input.type = 'radio';
+                            input.name = `question${e}`;
+                            input.value = answer[0];
+                            input.addEventListener('change', () => {
+                                forms[e] = answer[0]
+                            })
+
+                            const label = document.createElement('label');
+                            label.appendChild(input);
+                            label.appendChild(document.createTextNode(answer[1]));
+
+                            div_question.appendChild(label);
+                        })
+
+                        div_part.appendChild(div_question)
+                    })
+
+                    document.getElementById('form').appendChild(div_part)
+                })
+            })
+            .catch(error => {
+                console.error('Fetch error:', error);
+            });
+    </script>
+</body>
+
+</html>
