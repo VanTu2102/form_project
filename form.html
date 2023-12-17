@@ -19,7 +19,7 @@
         <span class="text-white">Hope you have a nice day</span>
     </div>
     <script>
-        let forms = {}
+        let forms = []
         function submit() {
             fetch('http://127.0.0.1:8000/api/post_form', {
                 method: 'POST',
@@ -27,7 +27,7 @@
                     'Content-Type': 'application/json',
                 },
                 mode: 'no-cors',
-                body: JSON.stringify(forms),
+                body: JSON.stringify({ data: forms }),
             })
                 .then(response => {
                     console.log(response)
@@ -74,7 +74,7 @@
                             input.name = `question${e}`;
                             input.value = answer[0];
                             input.addEventListener('change', () => {
-                                forms[e] = answer[0]
+                                forms.push(answer[0])
                             })
 
                             const label = document.createElement('label');

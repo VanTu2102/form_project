@@ -3,6 +3,7 @@ import json
 from typing import Any
 import mysql.connector
 from mysql.connector import errorcode
+import uuid
 
 config = {
     "user": "root",
@@ -62,7 +63,6 @@ if cnx.is_connected():
     # # Replace 'forms' and column definitions according to your requirements
     # create_table_query = '''
     #     CREATE TABLE IF NOT EXISTS forms (
-    #         id INT PRIMARY KEY,
     #         session_id TEXT NOT NULL,
     #         answer_id INT NOT NULL,
     #         last_updated TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
@@ -203,12 +203,24 @@ class RequestHandler(BaseHTTPRequestHandler):
             content_length = int(self.headers["Content-Length"])
             post_data = self.rfile.read(content_length).decode("utf-8")
             json_data = json.loads(post_data)
+            cursor = cnx.cursor()
 
-            uuid = uuid.uuid4()
+            id = uuid.uuid4()
 
-            print(json_data, uuid)
+            insert_query = """
+                INSERT INTO forms (session_id, answer_id)
+                VALUES (%(session_id)s, %(answer_id)s)
+            """
 
-            response_data = {"message": "message"}
+            for i in json_data["data"]:
+                data_to_insert = {
+                    'session_id': str(id),
+                    'answer_id': i
+                }
+                cursor.execute(insert_query, data_to_insert)
+            cnx.commit()
+
+            response_data = {"message": "success"}
 
             self._send_response(200, response_data)
         else:
