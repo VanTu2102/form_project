@@ -196,11 +196,11 @@ class RequestHandler(BaseHTTPRequestHandler):
                 res[row[0]] = {"part": row[1], "question": question}
 
             self._send_response(200, {"data": res})
-        if self.path == "/api/datasurvey":
+        elif self.path == "/api/datasurvey":
             cursor = cnx.cursor()
             data = cursor.execute(
                 """SELECT * FROM (
-                        SELECT forms.session_id, forms.answer_id, forms.last_updated, answers.answer, answers.value, 			answers.question_id FROM forms JOIN
+                        SELECT forms.session_id, forms.answer_id, forms.last_updated, answers.answer, answers.value, answers.question_id FROM forms JOIN
                         answers WHERE forms.answer_id = answers.id
                     ) AS fa
                     JOIN questions WHERE questions.id = fa.question_id
