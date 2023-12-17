@@ -213,14 +213,11 @@ class RequestHandler(BaseHTTPRequestHandler):
             """
 
             for i in json_data["data"]:
-                data_to_insert = {
-                    'session_id': str(id),
-                    'answer_id': i
-                }
+                data_to_insert = {"session_id": str(id), "answer_id": i}
                 cursor.execute(insert_query, data_to_insert)
             cnx.commit()
 
-            response_data = {"message": "success"}
+            response_data = {'message': "success", 'id': str(id)}
 
             self._send_response(200, response_data)
         else:
