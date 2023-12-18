@@ -220,14 +220,14 @@ class RequestHandler(BaseHTTPRequestHandler):
                     "question": i[7],
                     "answer": i[3],
                     "value": i[4],
-                    "update_time":datetime.isoformat(i[2])
+                    "update_time": datetime.isoformat(i[2]),
                 }
                 res_data.append(e)
             self._send_response(200, {"data": res_data})
         elif self.path.find("/api/chartsurvey") >= 0:
             parsed_url = urlparse(self.path)
             query_params = parse_qs(parsed_url.query)
-            if query_params['id'][0] == "1":
+            if query_params["id"][0] == "1":
                 cursor = cnx.cursor()
                 data_label_answer = cursor.execute(
                     """SELECT answers.answer FROM `answers`
@@ -253,28 +253,28 @@ class RequestHandler(BaseHTTPRequestHandler):
                 expenses_10 = [0, 0, 0, 0]
                 for i in res_data_x:
                     cursor.execute(
-                            """SELECT * FROM `forms` WHERE forms.answer_id = """ + str(i[1])
-                        )
+                        """SELECT * FROM `forms` WHERE forms.answer_id = """ + str(i[1])
+                    )
                     session_gr = cursor.fetchall()
                     query_count = """SELECT *, COUNT(forms.answer_id) FROM `forms` WHERE forms.answer_id BETWEEN 7 AND 10 AND ("""
                     for j in session_gr:
-                        if(session_gr.index(j) == 0):
-                            query_count += (" forms.session_id = '" + j[0] + "'")
+                        if session_gr.index(j) == 0:
+                            query_count += " forms.session_id = '" + j[0] + "'"
                         else:
-                            query_count += (" OR forms.session_id = '" + j[0] + "'")
+                            query_count += " OR forms.session_id = '" + j[0] + "'"
                     query_count += ") GROUP BY forms.answer_id"
                     cursor.execute(query_count)
                     count_gr = cursor.fetchall()
                     for j in count_gr:
-                        if (i[1]==44):
-                            expenses_7[0] += j[3]
-                        if (i[1]==45):
-                            expenses_8[1] += j[3]
-                        if (i[1]==46):
-                            expenses_9[2] += j[3]
-                        if (i[1]==47):
-                            expenses_10[3] += j[3]
-                x = np.arange(len(label_x) if len(label_x)>=4 else 4)
+                        if i[1] == 44:
+                            expenses_7[j[1] - 7] += j[3]
+                        if i[1] == 45:
+                            expenses_8[j[1] - 7] += j[3]
+                        if i[1] == 46:
+                            expenses_9[j[1] - 7] += j[3]
+                        if i[1] == 47:
+                            expenses_10[j[1] - 7] += j[3]
+                x = np.arange(len(label_x) if len(label_x) >= 4 else 4)
 
                 # Độ rộng cột
                 width = 0.2
@@ -284,22 +284,38 @@ class RequestHandler(BaseHTTPRequestHandler):
                 rects1 = ax.bar(x - width, expenses_7, width, label=label_answer[0])
                 rects2 = ax.bar(x, expenses_8, width, label=label_answer[1])
                 rects3 = ax.bar(x + width, expenses_9, width, label=label_answer[2])
-                rects4 = ax.bar(x + 2 * width, expenses_10, width, label=label_answer[3])
+                rects4 = ax.bar(
+                    x + 2 * width, expenses_10, width, label=label_answer[3]
+                )
 
                 # Thêm các thông tin khác cho biểu đồ
-                ax.set_ylabel('Số lượng sinh viên')
-                ax.set_title('Số lượng sinh viên mỗi năm theo từng tiêu chí tiêu tiền')
+                ax.set_ylabel("Số lượng sinh viên")
+                ax.set_title("Số lượng sinh viên mỗi năm theo từng tiêu chí tiêu tiền")
                 ax.set_xticks(x)
                 ax.set_xticklabels(label_x)
                 ax.legend()
+                plt.ylim(
+                    0,
+                    max(
+                        [
+                            max(expenses_7),
+                            max(expenses_8),
+                            max(expenses_9),
+                            max(expenses_10),
+                        ]
+                    )
+                    + 4,
+                )
                 # Save the figure to a BytesIO buffer
                 buffer = io.BytesIO()
-                plt.savefig(buffer, format='png')
+                plt.savefig(buffer, format="png")
                 buffer.seek(0)
 
                 # Convert the buffer to a Base64 string
-                base64_image = base64.b64encode(buffer.read()).decode('utf-8')
-                self._send_response(200, {"data": 'data:image/png;base64,'+base64_image})
+                base64_image = base64.b64encode(buffer.read()).decode("utf-8")
+                self._send_response(
+                    200, {"data": "data:image/png;base64," + base64_image}
+                )
         else:
             self._send_response(404, {"error": "Not Found"})
 
@@ -322,7 +338,7 @@ class RequestHandler(BaseHTTPRequestHandler):
                 cursor.execute(insert_query, data_to_insert)
             cnx.commit()
 
-            self._send_response(200, {'message': "success", 'id': str(id)})
+            self._send_response(200, {"message": "success", "id": str(id)})
         else:
             self._send_response(404, {"error": "Not Found"})
 
