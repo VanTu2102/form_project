@@ -11,7 +11,14 @@
 <body class="bg-gray-200 m-10">
     <div class="p-5 rounded-[10px] justify-center flex flex-col items-center">
         <span class="h-full text-[32px] font-[600] pt-5">DASHBOARD</span>
-        <div class="flex">
+        <select onchange="get_fig2(value), get_fig3(value)"
+            class="mt-4 mb-1 w-[1090px] border-gray-400 border-solid border rounded px-3 py-1">
+            <option value="44">First Year</option>
+            <option value="45">Second Year</option>
+            <option value="46">Third Year</option>
+            <option value="47">Four Year+</option>
+        </select>
+        <!-- <div class="flex">
             <div class="bg-white m-5 rounded-[10px] py-2 px-4 flex justify-center flex-col items-center">
                 <span class="text-[13px] pb-2 font-[600]">Số lượng người tham gia khảo sát</span>
                 <div class="h-[100px] w-[300px] bg-black"></div>
@@ -24,20 +31,13 @@
                 <span class="text-[13px] pb-2 font-[600]">Số lượng người tham gia khảo sát</span>
                 <div class="h-[100px] w-[300px] bg-black"></div>
             </div>
-        </div>
-        <div class="flex mt-10">
+        </div> -->
+        <div class="flex mt-5">
             <div class="bg-white m-2 rounded-[10px] p-5">
                 <div class="h-[500px] w-[600px] flex justify-center items-center" id="fig1"></div>
             </div>
             <div class="bg-white m-2 rounded-[10px] p-5">
                 <div class="h-[500px] w-[400px] flex flex-col justify-center items-center" id="fig2">
-                    <select onchange="get_fig2(value), get_fig3(value)"
-                        class="mb-4 border-gray-400 border-solid border rounded px-3 py-1">
-                        <option value="44">First Year</option>
-                        <option value="45">Second Year</option>
-                        <option value="46">Third Year</option>
-                        <option value="47">Four Year+</option>
-                    </select>
                 </div>
             </div>
         </div>

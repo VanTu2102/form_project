@@ -459,6 +459,7 @@ class RequestHandler(BaseHTTPRequestHandler):
                     else:
                         query_count += " OR forms.session_id = '" + j[0] + "'"
                 query_count += ") GROUP BY forms.answer_id"
+                
                 cursor.execute(query_count)
                 count_gr = cursor.fetchall()
                 for j in count_gr:
@@ -537,6 +538,7 @@ class RequestHandler(BaseHTTPRequestHandler):
                             query_count += " OR forms.session_id = '" + j[0] + "'"
                     query_count += ") GROUP BY forms.answer_id"
                     cursor.execute(query_count)
+                    
                     count_gr = cursor.fetchall()
                     cursor.execute("""SELECT MIN(answers.id) AS min FROM answers WHERE answers.question_id = """ + str(ques[0]))
                     min_answer = cursor.fetchall()[0][0]
