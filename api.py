@@ -280,12 +280,12 @@ class RequestHandler(BaseHTTPRequestHandler):
                 width = 0.2
 
                 # Vẽ biểu đồ
-                fig, ax = plt.subplots()
-                rects1 = ax.bar(x - width, expenses_7, width, label=label_answer[0])
-                rects2 = ax.bar(x, expenses_8, width, label=label_answer[1])
-                rects3 = ax.bar(x + width, expenses_9, width, label=label_answer[2])
+                fig, ax = plt.subplots(layout='constrained')
+                rects1 = ax.bar(x - width, [expenses_7[0], expenses_8[0], expenses_9[0], expenses_10[0]], width, label=label_answer[0])
+                rects2 = ax.bar(x, [expenses_7[1], expenses_8[1], expenses_9[1], expenses_10[1]], width, label=label_answer[1])
+                rects3 = ax.bar(x + width, [expenses_7[2], expenses_8[2], expenses_9[2], expenses_10[2]], width, label=label_answer[2])
                 rects4 = ax.bar(
-                    x + 2 * width, expenses_10, width, label=label_answer[3]
+                    x + 2 * width, [expenses_7[3], expenses_8[3], expenses_9[3], expenses_10[3]], width, label=label_answer[3]
                 )
 
                 # Thêm các thông tin khác cho biểu đồ
