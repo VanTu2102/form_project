@@ -27,15 +27,26 @@
         </div>
         <div class="flex mt-10">
             <div class="bg-white m-2 rounded-[10px] p-5">
-                <div class="h-[500px] w-[500px] bg-black"></div>
+                <div class="h-[500px] w-[600px] flex justify-center items-center" id="fig1"></div>
             </div>
             <div class="bg-white m-2 rounded-[10px] p-5">
-                <div class="h-[500px] w-[500px] bg-black"></div>
+                <div class="h-[500px] w-[400px] flex flex-col justify-center items-center" id="fig2">
+                    <select onchange="get_fig2(value)" class="mb-4 border-gray-400 border-solid border rounded px-3 py-1">
+                        <option value="44">First Year</option>
+                        <option value="45">Second Year</option>
+                        <option value="46">Third Year</option>
+                        <option value="47">Four Year+</option>
+                    </select>
+                </div>
             </div>
         </div>
         <div class="flex mt-10">
-            <div class="h-[500px] w-[500px] bg-black mr-10"></div>
-            <div class="h-[500px] w-[500px] bg-black mr-10"></div>
+            <div class="bg-white m-2 rounded-[10px] p-5">
+                <div class="h-[500px] w-[400px]"></div>
+            </div>
+            <div class="bg-white m-2 rounded-[10px] p-5">
+                <div class="h-[500px] w-[600px] flex justify-center items-center" id="fig3"></div>
+            </div>
         </div>
 
     </div>
@@ -50,8 +61,7 @@
             .then(data => {
                 let img = document.createElement('img')
                 img.setAttribute('src', data.data)
-                document.getElementsByTagName('body')[0].appendChild(img)
-                console.log(data.data)
+                document.getElementById('fig1').appendChild(img)
             })
             .catch(error => {
                 console.error('Fetch error:', error);
@@ -66,28 +76,32 @@
             .then(data => {
                 let img = document.createElement('img')
                 img.setAttribute('src', data.data)
-                document.getElementsByTagName('body')[0].appendChild(img)
-                console.log(data.data)
+                document.getElementById('fig3').appendChild(img)
             })
             .catch(error => {
                 console.error('Fetch error:', error);
             });
 
-        fetch('http://127.0.0.1:8000/api/chartsurvey?id=3&typesvid=47').then(response => {
-            if (!response.ok) {
-                throw new Error(`HTTP error! Status: ${response.status}`);
-            }
-            return response.json();
-        })
-            .then(data => {
-                let img = document.createElement('img')
-                img.setAttribute('src', data.data)
-                document.getElementsByTagName('body')[0].appendChild(img)
-                console.log(data.data)
+        function get_fig2(typesvid) {
+            fetch('http://127.0.0.1:8000/api/chartsurvey?id=3&typesvid=' + typesvid).then(response => {
+                if (!response.ok) {
+                    throw new Error(`HTTP error! Status: ${response.status}`);
+                }
+                return response.json();
             })
-            .catch(error => {
-                console.error('Fetch error:', error);
-            });
+                .then(data => {
+                    document.getElementById('fig2img')?.remove()
+                    let img = document.createElement('img')
+                    img.setAttribute('src', data.data)
+                    img.setAttribute('id', 'fig2img')
+                    document.getElementById('fig2').appendChild(img)
+
+                })
+                .catch(error => {
+                    console.error('Fetch error:', error);
+                });
+        }
+        get_fig2(44)
     </script>
 </body>
 

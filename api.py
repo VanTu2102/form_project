@@ -467,8 +467,8 @@ class RequestHandler(BaseHTTPRequestHandler):
                 plt.tight_layout()
 
                 # Add legend
-                plt.legend( loc="center left",
-                            bbox_to_anchor=(1, 0, 0.5, 1), 
+                plt.legend( loc="lower center",
+                            bbox_to_anchor=(0.5, -0.2), 
                             labels=label_answer)
 
                 # Save the figure to a BytesIO buffer
