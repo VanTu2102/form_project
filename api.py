@@ -395,9 +395,9 @@ class RequestHandler(BaseHTTPRequestHandler):
                     plt.plot(x, y_data[i], label=label_answer[i])
 
                 # Add labels and title
-                plt.ylabel('Y-axis')
+                plt.ylabel('Số lượng')
                 plt.xticks(x, label_x)
-                plt.title('Multi-Line Chart with Array Data')
+                plt.title('Mức tiết kiệm trung bình qua các năm')
 
                 # Add legend
                 plt.legend()
