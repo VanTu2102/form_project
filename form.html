@@ -32,7 +32,7 @@
             })
                 .then(response => {
                     forms = []
-                    location.reload()
+                    location.href = 'end.html'
                     console.log(response)
                     return response.json()
                 })
@@ -54,8 +54,10 @@
                 Object.keys(parts).forEach((v) => {
                     let div_part = document.createElement('div')
                     div_part.setAttribute('id', 'part' + v)
+                    div_part.setAttribute('class', 'mb-6')
 
                     let text_part = document.createElement('span')
+                    text_part.setAttribute('class', 'text-[20px]')
                     text_part.textContent = parts[v].part
                     div_part.appendChild(text_part)
 
@@ -63,7 +65,7 @@
                     Object.keys(questions).forEach((e) => {
                         let div_question = document.createElement('div')
                         div_question.setAttribute('id', 'question' + v)
-                        div_question.setAttribute('class', 'flex flex-col')
+                        div_question.setAttribute('class', 'flex flex-col ml-4')
 
                         let text_question = document.createElement('span')
                         text_question.textContent = questions[e].question
@@ -71,7 +73,7 @@
 
                         let answers = questions[e].answer
 
-                        answers.forEach((answer) => {
+                        answers.forEach((answer, i) => {
                             const input = document.createElement('input');
                             input.type = 'radio';
                             input.name = `question${e}`;
@@ -79,10 +81,10 @@
                             input.addEventListener('change', () => {
                                 forms.push(answer[0])
                             })
-
+                            input.setAttribute('class', 'mr-2')
                             const label = document.createElement('label');
                             label.appendChild(input);
-                            label.appendChild(document.createTextNode(answer[1]));
+                            label.appendChild(document.createTextNode((i+1)+ ', '+answer[1]));
 
                             div_question.appendChild(label);
                         })
