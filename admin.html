@@ -11,12 +11,14 @@
 <body class="bg-gray-200 m-10">
     <div class="p-5 rounded-[10px] justify-center flex flex-col items-center">
         <span class="h-full text-[32px] font-[600] pt-5">DASHBOARD</span>
-        <select onchange="get_fig2(value), get_fig3(value)"
+        <select onchange="get_fig4(value)"
             class="mt-4 mb-1 w-[1090px] border-gray-400 border-solid border rounded px-3 py-1">
-            <option value="44">First Year</option>
-            <option value="45">Second Year</option>
-            <option value="46">Third Year</option>
-            <option value="47">Four Year+</option>
+            <option value="2018">2018</option>
+            <option value="2019">2019</option>
+            <option value="2020">2020</option>
+            <option value="2021">2021</option>
+            <option value="2022">2022</option>
+            <option value="2023" selected>2023</option>
         </select>
         <!-- <div class="flex">
             <div class="bg-white m-5 rounded-[10px] py-2 px-4 flex justify-center flex-col items-center">
@@ -96,14 +98,14 @@
                     let img = document.createElement('img')
                     img.setAttribute('src', data.data)
                     img.setAttribute('id', 'fig2img')
-                    document.getElementById('fig2').appendChild(img)
+                    //document.getElementById('fig2').appendChild(img)
 
                 })
                 .catch(error => {
                     console.error('Fetch error:', error);
                 });
         }
-        get_fig2(44)
+        //get_fig2(44)
 
         function get_fig3(typesvid) {
             fetch('http://127.0.0.1:8000/api/chartsurvey?id=4&typesvid=' + typesvid).then(response => {
@@ -125,7 +127,7 @@
                         img.setAttribute('class', 'w-[80%]')
                         div.appendChild(text)
                         div.appendChild(img)
-                        document.getElementById('fig4').appendChild(div)
+                        //document.getElementById('fig4').appendChild(div)
                     })
 
                 })
@@ -133,7 +135,28 @@
                     console.error('Fetch error:', error);
                 });
         }
-        get_fig3(44)
+        //get_fig3(44)
+
+        function get_fig4(year) {
+            fetch('http://127.0.0.1:8000/api/chartsurvey?id=5&year=' + year).then(response => {
+                if (!response.ok) {
+                    throw new Error(`HTTP error! Status: ${response.status}`);
+                }
+                return response.json();
+            })
+                .then(data => {
+                    document.getElementById('fig2img')?.remove()
+                    let img = document.createElement('img')
+                    img.setAttribute('src', data.data)
+                    img.setAttribute('id', 'fig2img')
+                    document.getElementById('fig2').appendChild(img)
+
+                })
+                .catch(error => {
+                    console.error('Fetch error:', error);
+                });
+        }
+        get_fig4(2023)
     </script>
 </body>
 

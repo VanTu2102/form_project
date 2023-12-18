@@ -492,6 +492,45 @@ class RequestHandler(BaseHTTPRequestHandler):
                     200, {"data": "data:image/png;base64," + base64_image}
                 )
                 plt.clf()
+            if query_params["id"][0] == "5":
+                cursor = cnx.cursor()
+                data_answer = cursor.execute(
+                    """SELECT *, COUNT(forms.answer_id) FROM `forms` JOIN answers 
+                        WHERE forms.answer_id = answers.id 
+                        AND answers.question_id != 12 AND answers.id BETWEEN 1 AND 3 
+                        AND forms.last_updated BETWEEN '"""+query_params["year"][0]+"""-01-01 00:00:00' AND '"""+query_params["year"][0]+"""-12-31 00:00:00'
+                        GROUP BY forms.answer_id"""
+                )
+                res_data_answer = cursor.fetchall()
+                pie_1 = [t[7] for t in res_data_answer]
+                plt.subplot(1, 2, 1)
+                plt.subplots(figsize=(4, 4))
+                plt.pie(
+                    pie_1,
+                    autopct="%1.1f%%",
+                    startangle=90,
+                    colors=["lightblue", "lightgreen", "lightcoral"],
+                )
+                plt.title('From where do you derive your income?')
+
+                plt.tight_layout()
+
+                # Add legend
+                plt.legend(
+                    loc="lower center", bbox_to_anchor=(0.5, -0.2), labels=[t[4] for t in res_data_answer]
+                )
+
+                # Save the figure to a BytesIO buffer
+                buffer = io.BytesIO()
+                plt.savefig(buffer, format="png", dpi=300, bbox_inches="tight")
+                buffer.seek(0)
+
+                # Convert the buffer to a Base64 string
+                base64_image = base64.b64encode(buffer.read()).decode("utf-8")
+                self._send_response(
+                    200, {"data": "data:image/png;base64," + base64_image}
+                )
+                plt.clf()
             if query_params["id"][0] == "4":
                 cursor = cnx.cursor()
                 cursor.execute(
