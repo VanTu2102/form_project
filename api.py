@@ -280,12 +280,30 @@ class RequestHandler(BaseHTTPRequestHandler):
                 width = 0.2
 
                 # Vẽ biểu đồ
-                fig, ax = plt.subplots(layout='constrained')
-                rects1 = ax.bar(x - width, [expenses_7[0], expenses_8[0], expenses_9[0], expenses_10[0]], width, label=label_answer[0])
-                rects2 = ax.bar(x, [expenses_7[1], expenses_8[1], expenses_9[1], expenses_10[1]], width, label=label_answer[1])
-                rects3 = ax.bar(x + width, [expenses_7[2], expenses_8[2], expenses_9[2], expenses_10[2]], width, label=label_answer[2])
+                fig, ax = plt.subplots(layout="constrained")
+                rects1 = ax.bar(
+                    x - width,
+                    [expenses_7[0], expenses_8[0], expenses_9[0], expenses_10[0]],
+                    width,
+                    label=label_answer[0],
+                )
+                rects2 = ax.bar(
+                    x,
+                    [expenses_7[1], expenses_8[1], expenses_9[1], expenses_10[1]],
+                    width,
+                    label=label_answer[1],
+                )
+                rects3 = ax.bar(
+                    x + width,
+                    [expenses_7[2], expenses_8[2], expenses_9[2], expenses_10[2]],
+                    width,
+                    label=label_answer[2],
+                )
                 rects4 = ax.bar(
-                    x + 2 * width, [expenses_7[3], expenses_8[3], expenses_9[3], expenses_10[3]], width, label=label_answer[3]
+                    x + 2 * width,
+                    [expenses_7[3], expenses_8[3], expenses_9[3], expenses_10[3]],
+                    width,
+                    label=label_answer[3],
                 )
 
                 # Thêm các thông tin khác cho biểu đồ
@@ -316,6 +334,97 @@ class RequestHandler(BaseHTTPRequestHandler):
                 self._send_response(
                     200, {"data": "data:image/png;base64," + base64_image}
                 )
+                plt.clf()
+
+            if query_params["id"][0] == "2":
+                cursor = cnx.cursor()
+                data_label_answer = cursor.execute(
+                    """SELECT answers.answer FROM `answers`
+                            WHERE answers.question_id = 7"""
+                )
+                res_data_label_answer = cursor.fetchall()
+                label_answer = [t[0] for t in res_data_label_answer]
+                data_label_x = cursor.execute(
+                    """SELECT answers.answer FROM `answers`
+                            WHERE answers.question_id = 12"""
+                )
+                res_data_label_x = cursor.fetchall()
+                label_x = [t[0] for t in res_data_label_x]
+                data_x = cursor.execute(
+                    """SELECT answers.answer, answers.id, COUNT(*) FROM `forms` JOIN answers
+                            WHERE forms.answer_id = answers.id AND answers.question_id = 12
+                            GROUP BY forms.answer_id"""
+                )
+                res_data_x = cursor.fetchall()
+                line_7 = [0, 0, 0, 0]
+                line_8 = [0, 0, 0, 0]
+                line_9 = [0, 0, 0, 0]
+                line_10 = [0, 0, 0, 0]
+                for i in res_data_x:
+                    cursor.execute(
+                        """SELECT * FROM `forms` WHERE forms.answer_id = """ + str(i[1])
+                    )
+                    session_gr = cursor.fetchall()
+                    query_count = """SELECT *, COUNT(forms.answer_id) FROM `forms` WHERE forms.answer_id BETWEEN 24 AND 27 AND ("""
+                    for j in session_gr:
+                        if session_gr.index(j) == 0:
+                            query_count += " forms.session_id = '" + j[0] + "'"
+                        else:
+                            query_count += " OR forms.session_id = '" + j[0] + "'"
+                    query_count += ") GROUP BY forms.answer_id"
+                    cursor.execute(query_count)
+                    count_gr = cursor.fetchall()
+                    for j in count_gr:
+                        if i[1] == 44:
+                            line_7[j[1] - 24] += j[3]
+                        if i[1] == 45:
+                            line_8[j[1] - 24] += j[3]
+                        if i[1] == 46:
+                            line_9[j[1] - 24] += j[3]
+                        if i[1] == 47:
+                            line_10[j[1] - 24] += j[3]
+                x = np.arange(len(label_x) if len(label_x) >= 4 else 4)
+                y_data = np.array([
+                    np.array([line_7[0], line_8[0], line_9[0], line_10[0]]),
+                    np.array([line_7[1], line_8[1], line_9[1], line_10[1]]),
+                    np.array([line_7[2], line_8[2], line_9[2], line_10[2]]),
+                    np.array([line_7[3], line_8[3], line_9[3], line_10[3]])
+                ])
+
+                for i in range(len(label_answer)):
+                    plt.plot(x, y_data[i], label=label_answer[i])
+
+                # Add labels and title
+                plt.ylabel('Y-axis')
+                plt.xticks(x, label_x)
+                plt.title('Multi-Line Chart with Array Data')
+
+                # Add legend
+                plt.legend()
+                plt.ylim(
+                    0,
+                    max(
+                        [
+                            max(line_7),
+                            max(line_8),
+                            max(line_9),
+                            max(line_10),
+                        ]
+                    )
+                    + 3,
+                )
+
+                # Save the figure to a BytesIO buffer
+                buffer = io.BytesIO()
+                plt.savefig(buffer, format="png")
+                buffer.seek(0)
+
+                # Convert the buffer to a Base64 string
+                base64_image = base64.b64encode(buffer.read()).decode("utf-8")
+                self._send_response(
+                    200, {"data": "data:image/png;base64," + base64_image}
+                )
+                plt.clf()
         else:
             self._send_response(404, {"error": "Not Found"})
 
