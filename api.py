@@ -326,7 +326,7 @@ class RequestHandler(BaseHTTPRequestHandler):
                 )
                 # Save the figure to a BytesIO buffer
                 buffer = io.BytesIO()
-                plt.savefig(buffer, format="png")
+                plt.savefig(buffer, format="png", dpi=300, bbox_inches='tight')
                 buffer.seek(0)
 
                 # Convert the buffer to a Base64 string
@@ -415,7 +415,7 @@ class RequestHandler(BaseHTTPRequestHandler):
 
                 # Save the figure to a BytesIO buffer
                 buffer = io.BytesIO()
-                plt.savefig(buffer, format="png")
+                plt.savefig(buffer, format="png", dpi=300, bbox_inches='tight')
                 buffer.seek(0)
 
                 # Convert the buffer to a Base64 string
@@ -445,57 +445,35 @@ class RequestHandler(BaseHTTPRequestHandler):
                 )
                 res_data_x = cursor.fetchall()
                 pie_1 = [0, 0, 0]
-                pie_2 = [0, 0, 0]
-                pie_3 = [0, 0, 0]
-                pie_4 = [0, 0, 0]
-                for i in res_data_x:
-                    cursor.execute(
-                        """SELECT * FROM `forms` WHERE forms.answer_id = """ + str(i[1])
-                    )
-                    session_gr = cursor.fetchall()
-                    query_count = """SELECT *, COUNT(forms.answer_id) FROM `forms` WHERE forms.answer_id BETWEEN 1 AND 3 AND ("""
-                    for j in session_gr:
-                        if session_gr.index(j) == 0:
-                            query_count += " forms.session_id = '" + j[0] + "'"
-                        else:
-                            query_count += " OR forms.session_id = '" + j[0] + "'"
-                    query_count += ") GROUP BY forms.answer_id"
-                    cursor.execute(query_count)
-                    count_gr = cursor.fetchall()
-                    for j in count_gr:
-                        if i[1] == 44:
-                            pie_1[j[1] - 1] += j[3]
-                        if i[1] == 45:
-                            pie_2[j[1] - 1] += j[3]
-                        if i[1] == 46:
-                            pie_3[j[1] - 1] += j[3]
-                        if i[1] == 47:
-                            pie_4[j[1] - 1] += j[3]
-                print([pie_1, pie_2, pie_3, pie_4])
+                cursor.execute(
+                    """SELECT * FROM `forms` WHERE forms.answer_id = """ + query_params["typesvid"][0]
+                )
+                session_gr = cursor.fetchall()
+                query_count = """SELECT *, COUNT(forms.answer_id) FROM `forms` WHERE forms.answer_id BETWEEN 1 AND 3 AND ("""
+                for j in session_gr:
+                    if session_gr.index(j) == 0:
+                        query_count += " forms.session_id = '" + j[0] + "'"
+                    else:
+                        query_count += " OR forms.session_id = '" + j[0] + "'"
+                query_count += ") GROUP BY forms.answer_id"
+                cursor.execute(query_count)
+                count_gr = cursor.fetchall()
+                for j in count_gr:
+                    pie_1[j[1] - 1] += j[3]
                 plt.subplot(1, 2, 1)
-                plt.pie(pie_1, labels=label_answer, autopct='%1.1f%%', startangle=90, colors=['lightblue', 'lightgreen', 'lightcoral'])
-                plt.title(label_x[0])
-                
-                plt.subplot(1, 2, 2)
-                plt.pie(pie_2, labels=label_answer, autopct='%1.1f%%', startangle=90, colors=['lightblue', 'lightgreen', 'lightcoral'])
-                plt.title(label_x[1])
-                
-                plt.subplot(2, 2, 1)
-                plt.pie(pie_3, labels=label_answer, autopct='%1.1f%%', startangle=90, colors=['lightblue', 'lightgreen', 'lightcoral'])
-                plt.title(label_x[2])
-                
-                plt.subplot(2, 2, 2)
-                plt.pie(pie_4, labels=label_answer, autopct='%1.1f%%', startangle=90, colors=['lightblue', 'lightgreen', 'lightcoral'])
-                plt.title(label_x[3])
+                plt.pie(pie_1, autopct='%1.1f%%', startangle=90, colors=['lightblue', 'lightgreen', 'lightcoral'])
+                plt.title(label_x[int(query_params["typesvid"][0]) - 44])
 
                 plt.tight_layout()
 
                 # Add legend
-                plt.legend()
+                plt.legend( loc="center left",
+                            bbox_to_anchor=(1, 0, 0.5, 1), 
+                            labels=label_answer)
 
                 # Save the figure to a BytesIO buffer
                 buffer = io.BytesIO()
-                plt.savefig(buffer, format="png")
+                plt.savefig(buffer, format="png", dpi=300, bbox_inches='tight')
                 buffer.seek(0)
 
                 # Convert the buffer to a Base64 string
