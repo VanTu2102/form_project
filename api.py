@@ -335,7 +335,6 @@ class RequestHandler(BaseHTTPRequestHandler):
                     200, {"data": "data:image/png;base64," + base64_image}
                 )
                 plt.clf()
-
             if query_params["id"][0] == "2":
                 cursor = cnx.cursor()
                 data_label_answer = cursor.execute(
@@ -413,6 +412,86 @@ class RequestHandler(BaseHTTPRequestHandler):
                     )
                     + 3,
                 )
+
+                # Save the figure to a BytesIO buffer
+                buffer = io.BytesIO()
+                plt.savefig(buffer, format="png")
+                buffer.seek(0)
+
+                # Convert the buffer to a Base64 string
+                base64_image = base64.b64encode(buffer.read()).decode("utf-8")
+                self._send_response(
+                    200, {"data": "data:image/png;base64," + base64_image}
+                )
+                plt.clf()
+            if query_params["id"][0] == "3":
+                cursor = cnx.cursor()
+                data_label_answer = cursor.execute(
+                    """SELECT answers.answer FROM `answers`
+                            WHERE answers.question_id = 1"""
+                )
+                res_data_label_answer = cursor.fetchall()
+                label_answer = [t[0] for t in res_data_label_answer]
+                data_label_x = cursor.execute(
+                    """SELECT answers.answer FROM `answers`
+                            WHERE answers.question_id = 12"""
+                )
+                res_data_label_x = cursor.fetchall()
+                label_x = [t[0] for t in res_data_label_x]
+                data_x = cursor.execute(
+                    """SELECT answers.answer, answers.id, COUNT(*) FROM `forms` JOIN answers
+                            WHERE forms.answer_id = answers.id AND answers.question_id = 12
+                            GROUP BY forms.answer_id"""
+                )
+                res_data_x = cursor.fetchall()
+                pie_1 = [0, 0, 0]
+                pie_2 = [0, 0, 0]
+                pie_3 = [0, 0, 0]
+                pie_4 = [0, 0, 0]
+                for i in res_data_x:
+                    cursor.execute(
+                        """SELECT * FROM `forms` WHERE forms.answer_id = """ + str(i[1])
+                    )
+                    session_gr = cursor.fetchall()
+                    query_count = """SELECT *, COUNT(forms.answer_id) FROM `forms` WHERE forms.answer_id BETWEEN 1 AND 3 AND ("""
+                    for j in session_gr:
+                        if session_gr.index(j) == 0:
+                            query_count += " forms.session_id = '" + j[0] + "'"
+                        else:
+                            query_count += " OR forms.session_id = '" + j[0] + "'"
+                    query_count += ") GROUP BY forms.answer_id"
+                    cursor.execute(query_count)
+                    count_gr = cursor.fetchall()
+                    for j in count_gr:
+                        if i[1] == 44:
+                            pie_1[j[1] - 1] += j[3]
+                        if i[1] == 45:
+                            pie_2[j[1] - 1] += j[3]
+                        if i[1] == 46:
+                            pie_3[j[1] - 1] += j[3]
+                        if i[1] == 47:
+                            pie_4[j[1] - 1] += j[3]
+                print([pie_1, pie_2, pie_3, pie_4])
+                plt.subplot(1, 2, 1)
+                plt.pie(pie_1, labels=label_answer, autopct='%1.1f%%', startangle=90, colors=['lightblue', 'lightgreen', 'lightcoral'])
+                plt.title(label_x[0])
+                
+                plt.subplot(1, 2, 2)
+                plt.pie(pie_2, labels=label_answer, autopct='%1.1f%%', startangle=90, colors=['lightblue', 'lightgreen', 'lightcoral'])
+                plt.title(label_x[1])
+                
+                plt.subplot(2, 2, 1)
+                plt.pie(pie_3, labels=label_answer, autopct='%1.1f%%', startangle=90, colors=['lightblue', 'lightgreen', 'lightcoral'])
+                plt.title(label_x[2])
+                
+                plt.subplot(2, 2, 2)
+                plt.pie(pie_4, labels=label_answer, autopct='%1.1f%%', startangle=90, colors=['lightblue', 'lightgreen', 'lightcoral'])
+                plt.title(label_x[3])
+
+                plt.tight_layout()
+
+                # Add legend
+                plt.legend()
 
                 # Save the figure to a BytesIO buffer
                 buffer = io.BytesIO()
