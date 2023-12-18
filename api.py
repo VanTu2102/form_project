@@ -262,7 +262,8 @@ class RequestHandler(BaseHTTPRequestHandler):
                             query_count += " forms.session_id = '" + j[0] + "'"
                         else:
                             query_count += " OR forms.session_id = '" + j[0] + "'"
-                    query_count += ") GROUP BY forms.answer_id"
+                    query_count += ") AND forms.last_updated BETWEEN '"""+query_params["year"][0]+"""-01-01 00:00:00' AND '"""+query_params["year"][0]+"""-12-31 00:00:00'
+                        GROUP BY forms.answer_id"""
                     cursor.execute(query_count)
                     count_gr = cursor.fetchall()
                     for j in count_gr:
@@ -370,7 +371,8 @@ class RequestHandler(BaseHTTPRequestHandler):
                             query_count += " forms.session_id = '" + j[0] + "'"
                         else:
                             query_count += " OR forms.session_id = '" + j[0] + "'"
-                    query_count += ") GROUP BY forms.answer_id"
+                    query_count += ") AND forms.last_updated BETWEEN '"""+query_params["year"][0]+"""-01-01 00:00:00' AND '"""+query_params["year"][0]+"""-12-31 00:00:00'
+                        GROUP BY forms.answer_id"""
                     cursor.execute(query_count)
                     count_gr = cursor.fetchall()
                     for j in count_gr:

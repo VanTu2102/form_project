@@ -11,7 +11,7 @@
 <body class="bg-gray-200 m-10">
     <div class="p-5 rounded-[10px] justify-center flex flex-col items-center">
         <span class="h-full text-[32px] font-[600] pt-5">DASHBOARD</span>
-        <select onchange="get_fig4(value)"
+        <select onchange="get_fig4(value), get_fig5(value), get_fig6(value)"
             class="mt-4 mb-1 w-[1090px] border-gray-400 border-solid border rounded px-3 py-1">
             <option value="2018">2018</option>
             <option value="2019">2019</option>
@@ -48,44 +48,51 @@
                 <div class="h-max w-[400px] flex flex-col justify-center items-startl" id="fig4">
                 </div>
             </div>
-            <div class="bg-white max-h-[500px] m-2 rounded-[10px] p-5">
-                <div class="max-h-[500px] w-[600px] flex justify-center items-center" id="fig3"></div>
+            <div class="bg-white min-h-max m-2 rounded-[10px] p-5">
+                <div class="min-h-max w-[600px] flex justify-center items-center" id="fig3"></div>
             </div>
         </div>
 
     </div>
 
     <script>
-        fetch('http://127.0.0.1:8000/api/chartsurvey?id=1').then(response => {
-            if (!response.ok) {
-                throw new Error(`HTTP error! Status: ${response.status}`);
-            }
-            return response.json();
-        })
-            .then(data => {
-                let img = document.createElement('img')
-                img.setAttribute('src', data.data)
-                document.getElementById('fig1').appendChild(img)
+        function get_fig5(year) {
+            fetch('http://127.0.0.1:8000/api/chartsurvey?id=1&year=' + year).then(response => {
+                if (!response.ok) {
+                    throw new Error(`HTTP error! Status: ${response.status}`);
+                }
+                return response.json();
             })
-            .catch(error => {
-                console.error('Fetch error:', error);
-            });
+                .then(data => {
+                    document.getElementById('fig5img')?.remove()
+                    let img = document.createElement('img')
+                    img.setAttribute('src', data.data)
+                    img.setAttribute('id', 'fig5img')
+                    document.getElementById('fig1').appendChild(img)
+                })
+                .catch(error => {
+                    console.error('Fetch error:', error);
+                });
+        }
 
-        fetch('http://127.0.0.1:8000/api/chartsurvey?id=2').then(response => {
-            if (!response.ok) {
-                throw new Error(`HTTP error! Status: ${response.status}`);
-            }
-            return response.json();
-        })
-            .then(data => {
-                let img = document.createElement('img')
-                img.setAttribute('src', data.data)
-                document.getElementById('fig3').appendChild(img)
+        function get_fig6(year) {
+            fetch('http://127.0.0.1:8000/api/chartsurvey?id=2&year=' + year).then(response => {
+                if (!response.ok) {
+                    throw new Error(`HTTP error! Status: ${response.status}`);
+                }
+                return response.json();
             })
-            .catch(error => {
-                console.error('Fetch error:', error);
-            });
-
+                .then(data => {
+                    document.getElementById('fig6img')?.remove()
+                    let img = document.createElement('img')
+                    img.setAttribute('src', data.data)
+                    img.setAttribute('id', 'fig6img')
+                    document.getElementById('fig3').appendChild(img)
+                })
+                .catch(error => {
+                    console.error('Fetch error:', error);
+                });
+        }
         function get_fig2(typesvid) {
             fetch('http://127.0.0.1:8000/api/chartsurvey?id=3&typesvid=' + typesvid).then(response => {
                 if (!response.ok) {
@@ -121,7 +128,7 @@
                         div.setAttribute('class', 'flex flex-col h-max')
                         div.setAttribute('id', 'fig4' + i)
                         let text = document.createElement('span')
-                        text.textContent = (i+1) + ', ' + key
+                        text.textContent = (i + 1) + ', ' + key
                         let img = document.createElement('img')
                         img.setAttribute('src', data[key])
                         img.setAttribute('class', 'w-[80%]')
@@ -157,6 +164,8 @@
                 });
         }
         get_fig4(2023)
+        get_fig6(2023)
+        get_fig5(2023)
     </script>
 </body>
 
