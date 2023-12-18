@@ -326,7 +326,7 @@ class RequestHandler(BaseHTTPRequestHandler):
                 )
                 # Save the figure to a BytesIO buffer
                 buffer = io.BytesIO()
-                plt.savefig(buffer, format="png", dpi=300, bbox_inches='tight')
+                plt.savefig(buffer, format="png", dpi=300, bbox_inches="tight")
                 buffer.seek(0)
 
                 # Convert the buffer to a Base64 string
@@ -383,25 +383,27 @@ class RequestHandler(BaseHTTPRequestHandler):
                         if i[1] == 47:
                             line_10[j[1] - 24] += j[3]
                 x = np.arange(len(label_x) if len(label_x) >= 4 else 4)
-                y_data = np.array([
-                    np.array([line_7[0], line_8[0], line_9[0], line_10[0]]),
-                    np.array([line_7[1], line_8[1], line_9[1], line_10[1]]),
-                    np.array([line_7[2], line_8[2], line_9[2], line_10[2]]),
-                    np.array([line_7[3], line_8[3], line_9[3], line_10[3]])
-                ])
+                y_data = np.array(
+                    [
+                        np.array([line_7[0], line_8[0], line_9[0], line_10[0]]),
+                        np.array([line_7[1], line_8[1], line_9[1], line_10[1]]),
+                        np.array([line_7[2], line_8[2], line_9[2], line_10[2]]),
+                        np.array([line_7[3], line_8[3], line_9[3], line_10[3]]),
+                    ]
+                )
 
                 for i in range(len(label_answer)):
                     plt.plot(x, y_data[i], label=label_answer[i])
 
                 # Add labels and title
-                plt.ylabel('Số lượng')
+                plt.ylabel("Số lượng")
                 plt.xticks(x, label_x)
-                plt.title('Mức tiết kiệm')
+                plt.title("Mức tiết kiệm")
 
                 # Add legend
                 plt.legend()
                 plt.ylim(
-                    0,
+                    -1,
                     max(
                         [
                             max(line_7),
@@ -415,7 +417,7 @@ class RequestHandler(BaseHTTPRequestHandler):
 
                 # Save the figure to a BytesIO buffer
                 buffer = io.BytesIO()
-                plt.savefig(buffer, format="png", dpi=300, bbox_inches='tight')
+                plt.savefig(buffer, format="png", dpi=300, bbox_inches="tight")
                 buffer.seek(0)
 
                 # Convert the buffer to a Base64 string
@@ -446,7 +448,8 @@ class RequestHandler(BaseHTTPRequestHandler):
                 res_data_x = cursor.fetchall()
                 pie_1 = [0, 0, 0]
                 cursor.execute(
-                    """SELECT * FROM `forms` WHERE forms.answer_id = """ + query_params["typesvid"][0]
+                    """SELECT * FROM `forms` WHERE forms.answer_id = """
+                    + query_params["typesvid"][0]
                 )
                 session_gr = cursor.fetchall()
                 query_count = """SELECT *, COUNT(forms.answer_id) FROM `forms` WHERE forms.answer_id BETWEEN 1 AND 3 AND ("""
@@ -461,19 +464,25 @@ class RequestHandler(BaseHTTPRequestHandler):
                 for j in count_gr:
                     pie_1[j[1] - 1] += j[3]
                 plt.subplot(1, 2, 1)
-                plt.pie(pie_1, autopct='%1.1f%%', startangle=90, colors=['lightblue', 'lightgreen', 'lightcoral'])
+                plt.subplots(figsize=(4, 4))
+                plt.pie(
+                    pie_1,
+                    autopct="%1.1f%%",
+                    startangle=90,
+                    colors=["lightblue", "lightgreen", "lightcoral"],
+                )
                 plt.title(label_x[int(query_params["typesvid"][0]) - 44])
 
                 plt.tight_layout()
 
                 # Add legend
-                plt.legend( loc="lower center",
-                            bbox_to_anchor=(0.5, -0.2), 
-                            labels=label_answer)
+                plt.legend(
+                    loc="lower center", bbox_to_anchor=(0.5, -0.2), labels=label_answer
+                )
 
                 # Save the figure to a BytesIO buffer
                 buffer = io.BytesIO()
-                plt.savefig(buffer, format="png", dpi=300, bbox_inches='tight')
+                plt.savefig(buffer, format="png", dpi=300, bbox_inches="tight")
                 buffer.seek(0)
 
                 # Convert the buffer to a Base64 string
@@ -482,6 +491,84 @@ class RequestHandler(BaseHTTPRequestHandler):
                     200, {"data": "data:image/png;base64," + base64_image}
                 )
                 plt.clf()
+            if query_params["id"][0] == "4":
+                cursor = cnx.cursor()
+                cursor.execute(
+                    """SELECT * FROM `questions`
+                            WHERE questions.id != 12"""
+                )
+                data_questions = cursor.fetchall()
+                data_response_api = {}
+                for ques in data_questions:
+                    data_label_answer = cursor.execute(
+                        """SELECT answers.answer FROM `answers`
+                                WHERE answers.question_id = """
+                        + str(ques[0])
+                    )
+                    res_data_label_answer = cursor.fetchall()
+                    label_answer = [t[0] for t in res_data_label_answer]
+                    data_label_x = cursor.execute(
+                        """SELECT answers.answer FROM `answers`
+                                WHERE answers.question_id = 12"""
+                    )
+                    res_data_label_x = cursor.fetchall()
+                    label_x = [t[0] for t in res_data_label_x]
+                    data_x = cursor.execute(
+                        """SELECT answers.answer, answers.id, COUNT(*) FROM `forms` JOIN answers
+                                WHERE forms.answer_id = answers.id AND answers.question_id = 12
+                                GROUP BY forms.answer_id"""
+                    )
+                    res_data_x = cursor.fetchall()
+                    pie_1 = [0 for t in range(0, len(res_data_label_answer))]
+                    cursor.execute(
+                        """SELECT * FROM `forms` WHERE forms.answer_id = """
+                        + query_params["typesvid"][0]
+                    )
+                    session_gr = cursor.fetchall()
+                    query_count = (
+                        """SELECT *, COUNT(forms.answer_id) FROM `forms` JOIN answers WHERE forms.answer_id = answers.id AND answers.question_id ="""
+                        + str(ques[0])
+                        + """ AND ("""
+                    )
+                    for j in session_gr:
+                        if session_gr.index(j) == 0:
+                            query_count += " forms.session_id = '" + j[0] + "'"
+                        else:
+                            query_count += " OR forms.session_id = '" + j[0] + "'"
+                    query_count += ") GROUP BY forms.answer_id"
+                    cursor.execute(query_count)
+                    count_gr = cursor.fetchall()
+                    cursor.execute("""SELECT MIN(answers.id) AS min FROM answers WHERE answers.question_id = """ + str(ques[0]))
+                    min_answer = cursor.fetchall()[0][0]
+                    for j in count_gr:
+                        pie_1[j[1] - min_answer] += j[3]
+                    plt.subplots(figsize=(2, 2))
+                    plt.pie(
+                        pie_1,
+                        autopct="%1.1f%%",
+                        startangle=90,
+                        colors=["lightblue", "lightgreen", "lightcoral", "lightcyan"],
+                    )
+
+                    plt.tight_layout()
+
+                    # Add legend
+                    plt.legend(
+                        loc="lower center",
+                        bbox_to_anchor=(0.5, -0.5),
+                        labels=label_answer,
+                    )
+
+                    # Save the figure to a BytesIO buffer
+                    buffer = io.BytesIO()
+                    plt.savefig(buffer, format="png", dpi=300, bbox_inches="tight")
+                    buffer.seek(0)
+
+                    # Convert the buffer to a Base64 string
+                    base64_image = base64.b64encode(buffer.read()).decode("utf-8")
+                    data_response_api[ques[1]] = "data:image/png;base64," + base64_image
+                    plt.clf()
+                self._send_response(200, data_response_api)
         else:
             self._send_response(404, {"error": "Not Found"})
 
