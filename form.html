@@ -30,6 +30,8 @@
                 body: JSON.stringify({ data: forms }),
             })
                 .then(response => {
+                    forms = []
+                    location.reload()
                     console.log(response)
                     return response.json()
                 })

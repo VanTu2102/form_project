@@ -5,6 +5,11 @@ import mysql.connector
 from mysql.connector import errorcode
 import uuid
 from datetime import datetime
+from urllib.parse import urlparse, parse_qs
+import matplotlib.pyplot as plt
+import numpy as np
+import io
+import base64
 
 config = {
     "user": "root",
@@ -219,6 +224,82 @@ class RequestHandler(BaseHTTPRequestHandler):
                 }
                 res_data.append(e)
             self._send_response(200, {"data": res_data})
+        elif self.path.find("/api/chartsurvey") >= 0:
+            parsed_url = urlparse(self.path)
+            query_params = parse_qs(parsed_url.query)
+            if query_params['id'][0] == "1":
+                cursor = cnx.cursor()
+                data_label_answer = cursor.execute(
+                    """SELECT answers.answer FROM `answers`
+                            WHERE answers.question_id = 3"""
+                )
+                res_data_label_answer = cursor.fetchall()
+                label_answer = [t[0] for t in res_data_label_answer]
+                data_label_x = cursor.execute(
+                    """SELECT answers.answer FROM `answers`
+                            WHERE answers.question_id = 12"""
+                )
+                res_data_label_x = cursor.fetchall()
+                label_x = [t[0] for t in res_data_label_x]
+                data_x = cursor.execute(
+                    """SELECT answers.answer, answers.id, COUNT(*) FROM `forms` JOIN answers
+                            WHERE forms.answer_id = answers.id AND answers.question_id = 12
+                            GROUP BY forms.answer_id"""
+                )
+                res_data_x = cursor.fetchall()
+                expenses_7 = [0, 0, 0, 0]
+                expenses_8 = [0, 0, 0, 0]
+                expenses_9 = [0, 0, 0, 0]
+                expenses_10 = [0, 0, 0, 0]
+                for i in res_data_x:
+                    cursor.execute(
+                            """SELECT * FROM `forms` WHERE forms.answer_id = """ + str(i[1])
+                        )
+                    session_gr = cursor.fetchall()
+                    query_count = """SELECT *, COUNT(forms.answer_id) FROM `forms` WHERE forms.answer_id BETWEEN 7 AND 10 AND ("""
+                    for j in session_gr:
+                        if(session_gr.index(j) == 0):
+                            query_count += (" forms.session_id = '" + j[0] + "'")
+                        else:
+                            query_count += (" OR forms.session_id = '" + j[0] + "'")
+                    query_count += ") GROUP BY forms.answer_id"
+                    cursor.execute(query_count)
+                    count_gr = cursor.fetchall()
+                    for j in count_gr:
+                        if (i[1]==44):
+                            expenses_7[0] += j[3]
+                        if (i[1]==45):
+                            expenses_8[1] += j[3]
+                        if (i[1]==46):
+                            expenses_9[2] += j[3]
+                        if (i[1]==47):
+                            expenses_10[3] += j[3]
+                x = np.arange(len(label_x) if len(label_x)>=4 else 4)
+
+                # Độ rộng cột
+                width = 0.2
+
+                # Vẽ biểu đồ
+                fig, ax = plt.subplots()
+                rects1 = ax.bar(x - width, expenses_7, width, label=label_answer[0])
+                rects2 = ax.bar(x, expenses_8, width, label=label_answer[1])
+                rects3 = ax.bar(x + width, expenses_9, width, label=label_answer[2])
+                rects4 = ax.bar(x + 2 * width, expenses_10, width, label=label_answer[3])
+
+                # Thêm các thông tin khác cho biểu đồ
+                ax.set_ylabel('Số lượng sinh viên')
+                ax.set_title('Số lượng sinh viên mỗi năm theo từng tiêu chí tiêu tiền')
+                ax.set_xticks(x)
+                ax.set_xticklabels(label_x)
+                ax.legend()
+                # Save the figure to a BytesIO buffer
+                buffer = io.BytesIO()
+                plt.savefig(buffer, format='png')
+                buffer.seek(0)
+
+                # Convert the buffer to a Base64 string
+                base64_image = base64.b64encode(buffer.read()).decode('utf-8')
+                self._send_response(200, {"data": 'data:image/png;base64,'+base64_image})
         else:
             self._send_response(404, {"error": "Not Found"})
 
@@ -241,9 +322,7 @@ class RequestHandler(BaseHTTPRequestHandler):
                 cursor.execute(insert_query, data_to_insert)
             cnx.commit()
 
-            response_data = {'message': "success", 'id': str(id)}
-
-            self._send_response(200, response_data)
+            self._send_response(200, {'message': "success", 'id': str(id)})
         else:
             self._send_response(404, {"error": "Not Found"})
 
