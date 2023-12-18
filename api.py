@@ -397,7 +397,7 @@ class RequestHandler(BaseHTTPRequestHandler):
                 # Add labels and title
                 plt.ylabel('Số lượng')
                 plt.xticks(x, label_x)
-                plt.title('Mức tiết kiệm trung bình qua các năm')
+                plt.title('Mức tiết kiệm')
 
                 # Add legend
                 plt.legend()
