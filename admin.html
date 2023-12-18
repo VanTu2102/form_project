@@ -45,7 +45,7 @@
         </div>
         <div class="flex mt-10">
             <div class="bg-white min-h-max m-2 rounded-[10px] p-5">
-                <div class="min-h-max w-[1000px] flex justify-center items-center" id="fig3"></div>
+                <div class="min-h-max w-[1060px] flex justify-center items-center" id="fig3"></div>
             </div>
         </div>
 
@@ -83,6 +83,7 @@
                     let img = document.createElement('img')
                     img.setAttribute('src', data.data)
                     img.setAttribute('id', 'fig6img')
+                    img.setAttribute('class', 'w-[80%]')
                     document.getElementById('fig3').appendChild(img)
                 })
                 .catch(error => {
