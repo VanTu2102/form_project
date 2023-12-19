@@ -649,7 +649,12 @@ class RequestHandler(BaseHTTPRequestHandler):
                 times = []
                 for i in res_label_answer:
                     value_y[i[1]] = [0]
-                data_answer = cursor.execute(
+                cursor.execute(
+                    """SELECT * FROM `forms` WHERE forms.answer_id = """
+                    + query_params["typesvid"][0]
+                )
+                session_gr = cursor.fetchall()
+                query_count = (
                     """SELECT * FROM `forms` JOIN answers 
                         WHERE forms.answer_id = answers.id 
                         AND answers.question_id = """
@@ -658,8 +663,15 @@ class RequestHandler(BaseHTTPRequestHandler):
                     + query_params["fromyear"][0]
                     + """-01-01 00:00:00' AND '"""
                     + query_params["toyear"][0]
-                    + """-12-31 00:00:00'"""
+                    + """-12-31 00:00:00'""" + """ AND ("""
                 )
+                for j in session_gr:
+                    if session_gr.index(j) == 0:
+                        query_count += " forms.session_id = '" + j[0] + "'"
+                    else:
+                        query_count += " OR forms.session_id = '" + j[0] + "'"
+                query_count = query_count + ")"
+                data_answer = cursor.execute(query_count)
                 res_data_answer = cursor.fetchall()
                 times_series = pd.DataFrame()
                 times_series = pd.DataFrame({
@@ -698,7 +710,9 @@ class RequestHandler(BaseHTTPRequestHandler):
 
                 # Rotate x-axis labels for better readability
                 plt.gcf().autofmt_xdate()
-                plt.legend(labels=[t[1] for t in res_label_answer])
+                plt.legend(labels=[t[1] for t in res_label_answer], 
+                    loc="lower center",
+                    bbox_to_anchor=(0.5, -0.2))
 
                 # Save the figure to a BytesIO buffer
                 buffer = io.BytesIO()
@@ -713,17 +727,24 @@ class RequestHandler(BaseHTTPRequestHandler):
                 plt.clf()
             elif query_params["id"][0] == "7":
                 cursor = cnx.cursor()
-                data_answer = cursor.execute(
-                    """SELECT *, COUNT(forms.answer_id) FROM `forms` JOIN answers 
-                        WHERE forms.answer_id = answers.id 
-                        AND answers.question_id = """+ query_params["question"][0] +
-                    """ AND forms.last_updated BETWEEN '"""
-                    + query_params["fromyear"][0]
-                    + """-01-01 00:00:00' AND '"""
-                    + query_params["toyear"][0]
-                    + """-12-31 00:00:00'
-                        GROUP BY forms.answer_id"""
+                cursor.execute(
+                    """SELECT * FROM `forms` WHERE forms.answer_id = """
+                    + query_params["typesvid"][0]
                 )
+                session_gr = cursor.fetchall()
+                query_count = (
+                    """SELECT *, COUNT(forms.answer_id) FROM `forms` JOIN answers WHERE forms.answer_id = answers.id AND answers.question_id ="""
+                    + query_params["question"][0]
+                    + """ AND ("""
+                )
+                for j in session_gr:
+                    if session_gr.index(j) == 0:
+                        query_count += " forms.session_id = '" + j[0] + "'"
+                    else:
+                        query_count += " OR forms.session_id = '" + j[0] + "'"
+                query_count = query_count + ") " + """ AND forms.last_updated BETWEEN '""" + query_params["fromyear"][0] + """-01-01 00:00:00' AND '""" + query_params["toyear"][0] + """-12-31 00:00:00' GROUP BY forms.answer_id"""
+                cursor.execute(query_count)
+
                 res_data_answer = cursor.fetchall()
                 pie_1 = [t[7] for t in res_data_answer]
                 plt.subplot(1, 2, 1)
