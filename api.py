@@ -645,6 +645,7 @@ class RequestHandler(BaseHTTPRequestHandler):
                 )
                 res_label_answer = cursor.fetchall()
                 value_y = {}
+                times = []
                 for i in res_label_answer:
                     value_y[i[1]] = [0]
                 data_answer = cursor.execute(
@@ -661,22 +662,13 @@ class RequestHandler(BaseHTTPRequestHandler):
                     "data" : [t for t in res_data_answer]
                 })
                 result = times_series.groupby(times_series['date'].dt.isocalendar().week).apply(lambda x: x[['date', 'data']].to_dict(orient='records')).to_dict()
-                last_updated = res_data_answer[0][2]
-                # for t in res_data_answer:
-                #     print(t[2], last_updated, timedelta(days=7),t[2] - last_updated > timedelta(days=7))
-                #     if len(times_series) == 0:
-                #         times_series.append(t[2].date())
-                #         value_y[t[4]][0] += 1
-                #     elif t[2] - last_updated < timedelta(days=7):
-                #         value_y[t[4]][len(value_y[t[4]]) - 1] += 1
-                #     elif t[2] - last_updated > timedelta(days=7):
-                #         times_series.append(t[2].date())
-                #         for key, value in value_y.items():
-                #             value_y[key].append(0)
-                #         value_y[t[4]][len(value_y[t[4]]) - 1] += 1
-                #         last_updated += timedelta(days=7)
                 for j in result:
-                    print(j, result[j])
+                    times.append(result[j][0]['date'])
+                    for i in result[j]:
+                        value_y[i["data"][4]][len(value_y[i["data"][4]]) - 1] += 1
+                    for key, value in value_y.items():
+                        value_y[key].append(0)
+                print(value_y, times)
                 plt.subplot(1, 2, 1)
                 plt.subplots(figsize=(4, 4))
                 plt.pie(
