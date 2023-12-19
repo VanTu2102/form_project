@@ -160,9 +160,30 @@
                     console.error('Fetch error:', error);
                 });
         }
+
+        function get_fig7(year, question) {
+            fetch('http://127.0.0.1:8000/api/chartsurvey?id=6&year=' + year + '&question=' + question).then(response => {
+                if (!response.ok) {
+                    throw new Error(`HTTP error! Status: ${response.status}`);
+                }
+                return response.json();
+            })
+                .then(data => {
+                    //document.getElementById('fig2img')?.remove()
+                    let img = document.createElement('img')
+                    img.setAttribute('src', data.data)
+                    img.setAttribute('id', 'fig2img')
+                    //document.getElementById('fig2').appendChild(img)
+
+                })
+                .catch(error => {
+                    console.error('Fetch error:', error);
+                });
+        }
         get_fig4(2023)
         get_fig6(2023)
         get_fig5(2023)
+        get_fig7(2023, 2)
     </script>
 </body>
 

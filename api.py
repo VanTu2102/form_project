@@ -4,12 +4,13 @@ from typing import Any
 import mysql.connector
 from mysql.connector import errorcode
 import uuid
-from datetime import datetime
+from datetime import datetime, timedelta
 from urllib.parse import urlparse, parse_qs
 import matplotlib.pyplot as plt
 import numpy as np
 import io
 import base64
+import pandas as pd
 
 config = {
     "user": "root",
@@ -262,8 +263,15 @@ class RequestHandler(BaseHTTPRequestHandler):
                             query_count += " forms.session_id = '" + j[0] + "'"
                         else:
                             query_count += " OR forms.session_id = '" + j[0] + "'"
-                    query_count += ") AND forms.last_updated BETWEEN '"""+query_params["year"][0]+"""-01-01 00:00:00' AND '"""+query_params["year"][0]+"""-12-31 00:00:00'
+                    query_count += (
+                        ") AND forms.last_updated BETWEEN '"
+                        ""
+                        + query_params["year"][0]
+                        + """-01-01 00:00:00' AND '"""
+                        + query_params["year"][0]
+                        + """-12-31 00:00:00'
                         GROUP BY forms.answer_id"""
+                    )
                     cursor.execute(query_count)
                     count_gr = cursor.fetchall()
                     for j in count_gr:
@@ -336,7 +344,7 @@ class RequestHandler(BaseHTTPRequestHandler):
                     200, {"data": "data:image/png;base64," + base64_image}
                 )
                 plt.clf()
-            if query_params["id"][0] == "2":
+            elif query_params["id"][0] == "2":
                 cursor = cnx.cursor()
                 data_label_answer = cursor.execute(
                     """SELECT answers.answer FROM `answers`
@@ -371,8 +379,15 @@ class RequestHandler(BaseHTTPRequestHandler):
                             query_count += " forms.session_id = '" + j[0] + "'"
                         else:
                             query_count += " OR forms.session_id = '" + j[0] + "'"
-                    query_count += ") AND forms.last_updated BETWEEN '"""+query_params["year"][0]+"""-01-01 00:00:00' AND '"""+query_params["year"][0]+"""-12-31 00:00:00'
+                    query_count += (
+                        ") AND forms.last_updated BETWEEN '"
+                        ""
+                        + query_params["year"][0]
+                        + """-01-01 00:00:00' AND '"""
+                        + query_params["year"][0]
+                        + """-12-31 00:00:00'
                         GROUP BY forms.answer_id"""
+                    )
                     cursor.execute(query_count)
                     count_gr = cursor.fetchall()
                     for j in count_gr:
@@ -428,7 +443,7 @@ class RequestHandler(BaseHTTPRequestHandler):
                     200, {"data": "data:image/png;base64," + base64_image}
                 )
                 plt.clf()
-            if query_params["id"][0] == "3":
+            elif query_params["id"][0] == "3":
                 cursor = cnx.cursor()
                 data_label_answer = cursor.execute(
                     """SELECT answers.answer FROM `answers`
@@ -461,7 +476,7 @@ class RequestHandler(BaseHTTPRequestHandler):
                     else:
                         query_count += " OR forms.session_id = '" + j[0] + "'"
                 query_count += ") GROUP BY forms.answer_id"
-                
+
                 cursor.execute(query_count)
                 count_gr = cursor.fetchall()
                 for j in count_gr:
@@ -494,13 +509,17 @@ class RequestHandler(BaseHTTPRequestHandler):
                     200, {"data": "data:image/png;base64," + base64_image}
                 )
                 plt.clf()
-            if query_params["id"][0] == "5":
+            elif query_params["id"][0] == "5":
                 cursor = cnx.cursor()
                 data_answer = cursor.execute(
                     """SELECT *, COUNT(forms.answer_id) FROM `forms` JOIN answers 
                         WHERE forms.answer_id = answers.id 
                         AND answers.question_id != 12 AND answers.id BETWEEN 1 AND 3 
-                        AND forms.last_updated BETWEEN '"""+query_params["year"][0]+"""-01-01 00:00:00' AND '"""+query_params["year"][0]+"""-12-31 00:00:00'
+                        AND forms.last_updated BETWEEN '"""
+                    + query_params["year"][0]
+                    + """-01-01 00:00:00' AND '"""
+                    + query_params["year"][0]
+                    + """-12-31 00:00:00'
                         GROUP BY forms.answer_id"""
                 )
                 res_data_answer = cursor.fetchall()
@@ -513,13 +532,15 @@ class RequestHandler(BaseHTTPRequestHandler):
                     startangle=90,
                     colors=["lightblue", "lightgreen", "lightcoral"],
                 )
-                plt.title('From where do you derive your income?')
+                plt.title("From where do you derive your income?")
 
                 plt.tight_layout()
 
                 # Add legend
                 plt.legend(
-                    loc="lower center", bbox_to_anchor=(0.5, -0.2), labels=[t[4] for t in res_data_answer]
+                    loc="lower center",
+                    bbox_to_anchor=(0.5, -0.2),
+                    labels=[t[4] for t in res_data_answer],
                 )
 
                 # Save the figure to a BytesIO buffer
@@ -533,7 +554,7 @@ class RequestHandler(BaseHTTPRequestHandler):
                     200, {"data": "data:image/png;base64," + base64_image}
                 )
                 plt.clf()
-            if query_params["id"][0] == "4":
+            elif query_params["id"][0] == "4":
                 cursor = cnx.cursor()
                 cursor.execute(
                     """SELECT * FROM `questions`
@@ -579,9 +600,12 @@ class RequestHandler(BaseHTTPRequestHandler):
                             query_count += " OR forms.session_id = '" + j[0] + "'"
                     query_count += ") GROUP BY forms.answer_id"
                     cursor.execute(query_count)
-                    
+
                     count_gr = cursor.fetchall()
-                    cursor.execute("""SELECT MIN(answers.id) AS min FROM answers WHERE answers.question_id = """ + str(ques[0]))
+                    cursor.execute(
+                        """SELECT MIN(answers.id) AS min FROM answers WHERE answers.question_id = """
+                        + str(ques[0])
+                    )
                     min_answer = cursor.fetchall()[0][0]
                     for j in count_gr:
                         pie_1[j[1] - min_answer] += j[3]
@@ -612,6 +636,77 @@ class RequestHandler(BaseHTTPRequestHandler):
                     data_response_api[ques[1]] = "data:image/png;base64," + base64_image
                     plt.clf()
                 self._send_response(200, data_response_api)
+            elif query_params["id"][0] == "6":
+                cursor = cnx.cursor()
+                cursor.execute(
+                    """SELECT * FROM answers 
+                        WHERE answers.question_id = """
+                    + query_params["question"][0]
+                )
+                res_label_answer = cursor.fetchall()
+                value_y = {}
+                for i in res_label_answer:
+                    value_y[i[1]] = [0]
+                data_answer = cursor.execute(
+                    """SELECT * FROM `forms` JOIN answers 
+                        WHERE forms.answer_id = answers.id 
+                        AND answers.question_id = """
+                    + query_params["question"][0]
+                    + """ 
+                        ORDER BY forms.last_updated"""
+                )
+                res_data_answer = cursor.fetchall()
+                times_series = pd.DataFrame({
+                    "date" : [t[2] for t in res_data_answer],
+                    "data" : [t for t in res_data_answer]
+                })
+                result = times_series.groupby(times_series['date'].dt.isocalendar().week).apply(lambda x: x[['date', 'data']].to_dict(orient='records')).to_dict()
+                last_updated = res_data_answer[0][2]
+                # for t in res_data_answer:
+                #     print(t[2], last_updated, timedelta(days=7),t[2] - last_updated > timedelta(days=7))
+                #     if len(times_series) == 0:
+                #         times_series.append(t[2].date())
+                #         value_y[t[4]][0] += 1
+                #     elif t[2] - last_updated < timedelta(days=7):
+                #         value_y[t[4]][len(value_y[t[4]]) - 1] += 1
+                #     elif t[2] - last_updated > timedelta(days=7):
+                #         times_series.append(t[2].date())
+                #         for key, value in value_y.items():
+                #             value_y[key].append(0)
+                #         value_y[t[4]][len(value_y[t[4]]) - 1] += 1
+                #         last_updated += timedelta(days=7)
+                for j in result:
+                    print(j, result[j])
+                plt.subplot(1, 2, 1)
+                plt.subplots(figsize=(4, 4))
+                plt.pie(
+                    pie_1,
+                    autopct="%1.1f%%",
+                    startangle=90,
+                    colors=["lightblue", "lightgreen", "lightcoral"],
+                )
+                plt.title("From where do you derive your income?")
+
+                plt.tight_layout()
+
+                # Add legend
+                plt.legend(
+                    loc="lower center",
+                    bbox_to_anchor=(0.5, -0.2),
+                    labels=[t[4] for t in res_data_answer],
+                )
+
+                # Save the figure to a BytesIO buffer
+                buffer = io.BytesIO()
+                plt.savefig(buffer, format="png", dpi=300, bbox_inches="tight")
+                buffer.seek(0)
+
+                # Convert the buffer to a Base64 string
+                base64_image = base64.b64encode(buffer.read()).decode("utf-8")
+                self._send_response(
+                    200, {"data": "data:image/png;base64," + base64_image}
+                )
+                plt.clf()
         else:
             self._send_response(404, {"error": "Not Found"})
 
