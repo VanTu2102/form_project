@@ -11,7 +11,7 @@
 <body class="bg-gray-200 m-10">
     <div class="p-5 rounded-[10px] justify-center flex flex-col items-center">
         <span class="h-full text-[32px] font-[600] pt-5">DASHBOARD</span>
-        <select onchange="get_fig4(value), get_fig5(value), get_fig6(value)"
+        <select onchange="get_fig4(value), get_fig5(value), get_fig10(value)"
             class="mt-4 mb-1 w-[1090px] border-gray-400 border-solid border rounded px-3 py-1">
             <option value="2018">2018</option>
             <option value="2019">2019</option>
@@ -36,18 +36,61 @@
         </div> -->
         <div class="flex mt-5">
             <div class="bg-white m-2 rounded-[10px] p-5">
-                <div class="h-[500px] w-[600px] flex justify-center items-center" id="fig1"></div>
+                <div class="h-[500px] w-[600px] flex flex-col justify-center items-center" id="fig2">
+                </div>
             </div>
             <div class="bg-white m-2 rounded-[10px] p-5">
-                <div class="h-[500px] w-[400px] flex flex-col justify-center items-center" id="fig2">
+                <div class="h-[500px] w-[600px] flex flex-col justify-center items-center" id="fig3">
                 </div>
             </div>
         </div>
-        <div class="flex mt-10">
-            <div class="bg-white min-h-max m-2 rounded-[10px] p-5">
-                <div class="min-h-max w-[1060px] flex justify-center items-center" id="fig3"></div>
+        <div class="flex mt-5">
+            <div class="bg-white m-2 rounded-[10px] p-5">
+                <div class="h-[500px] w-[600px] flex flex-col justify-center items-center" id="fig4">
+                </div>
+            </div>
+            <div class="bg-white m-2 rounded-[10px] p-5">
+                <div class="h-[500px] w-[600px] flex flex-col justify-center items-center" id="fig6">
+                </div>
             </div>
         </div>
+        <div class="flex mt-5">
+            <div class="bg-white m-2 rounded-[10px] p-5">
+                <div class="h-[500px] w-[600px] flex flex-col justify-center items-center" id="fig7">
+                </div>
+            </div>
+            <div class="bg-white m-2 rounded-[10px] p-5">
+                <div class="h-[500px] w-[600px] flex flex-col justify-center items-center" id="fig8">
+                </div>
+            </div>
+        </div>
+        <div class="flex mt-5">
+            <div class="bg-white m-2 rounded-[10px] p-5">
+                <div class="h-[500px] w-[400px] flex justify-center items-center" id="fig11"></div>
+            </div>
+            <div class="bg-white m-2 rounded-[10px] p-5">
+                <div class="h-[500px] w-[400px] flex justify-center items-center" id="fig15"></div>
+            </div>
+            <div class="bg-white m-2 rounded-[10px] p-5">
+                <div class="h-[500px] w-[400px] flex justify-center items-center" id="fig19"></div>
+            </div>
+        </div>
+        <div class="flex mt-5">
+            <div class="bg-white m-2 rounded-[10px] p-5">
+                <div class="h-[500px] w-[400px] flex justify-center items-center" id="fig20"></div>
+            </div>
+            <div class="bg-white m-2 rounded-[10px] p-5">
+                <div class="h-[500px] w-[400px] flex justify-center items-center" id="fig21"></div>
+            </div>
+            <div class="bg-white m-2 rounded-[10px] p-5">
+                <div class="h-[500px] w-[400px] flex justify-center items-center" id="fig22"></div>
+            </div>
+        </div>
+        <!-- <div class="flex mt-10">
+            <div class="bg-white min-h-max m-2 rounded-[10px] p-5">
+                <div class="min-h-max w-[1060px] flex justify-center items-center" id="fig10"></div>
+            </div>
+        </div> -->
 
     </div>
 
@@ -71,7 +114,7 @@
                 });
         }
 
-        function get_fig6(year) {
+        function get_fig10(year) {
             fetch('http://127.0.0.1:8000/api/chartsurvey?id=2&year=' + year).then(response => {
                 if (!response.ok) {
                     throw new Error(`HTTP error! Status: ${response.status}`);
@@ -79,12 +122,12 @@
                 return response.json();
             })
                 .then(data => {
-                    document.getElementById('fig6img')?.remove()
+                    document.getElementById('fig10img')?.remove()
                     let img = document.createElement('img')
                     img.setAttribute('src', data.data)
-                    img.setAttribute('id', 'fig6img')
+                    img.setAttribute('id', 'fig10img')
                     img.setAttribute('class', 'w-[80%]')
-                    document.getElementById('fig3').appendChild(img)
+                    document.getElementById('fig10').appendChild(img)
                 })
                 .catch(error => {
                     console.error('Fetch error:', error);
@@ -169,21 +212,50 @@
                 return response.json();
             })
                 .then(data => {
-                    //document.getElementById('fig2img')?.remove()
+                    document.getElementById('fig' + question + 'img')?.remove()
                     let img = document.createElement('img')
                     img.setAttribute('src', data.data)
-                    img.setAttribute('id', 'fig2img')
-                    //document.getElementById('fig2').appendChild(img)
+                    img.setAttribute('id', 'fig' + question + 'img')
+                    document.getElementById('fig' + question).appendChild(img)
 
                 })
                 .catch(error => {
                     console.error('Fetch error:', error);
                 });
         }
-        get_fig4(2023)
-        get_fig6(2023)
+
+        function get_fig8(year, question) {
+            fetch('http://127.0.0.1:8000/api/chartsurvey?id=7&year=' + year + '&question=' + question).then(response => {
+                if (!response.ok) {
+                    throw new Error(`HTTP error! Status: ${response.status}`);
+                }
+                return response.json();
+            })
+                .then(data => {
+                    document.getElementById('fig' + (question + 10) + 'img')?.remove()
+                    let img = document.createElement('img')
+                    img.setAttribute('src', data.data)
+                    img.setAttribute('id', 'fig' + (question + 10) + 'img')
+                    document.getElementById('fig' + (question + 10)).appendChild(img)
+
+                })
+                .catch(error => {
+                    console.error('Fetch error:', error);
+                });
+        }
         get_fig5(2023)
-        get_fig7(2023, 2)
+        for (let i = 2; i < 5; i++) {
+            get_fig7(2023, i)
+        }
+        for (let i = 6; i < 9; i++) {
+            get_fig7(2023, i)
+        }
+        get_fig8(2023, 1)
+        get_fig8(2023, 5)
+        get_fig8(2023, 9)
+        get_fig8(2023, 10)
+        get_fig8(2023, 11)
+        get_fig8(2023, 12)
     </script>
 </body>
 

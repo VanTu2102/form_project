@@ -11,6 +11,7 @@ import numpy as np
 import io
 import base64
 import pandas as pd
+import matplotlib.dates as mdates
 
 config = {
     "user": "root",
@@ -638,7 +639,7 @@ class RequestHandler(BaseHTTPRequestHandler):
                 self._send_response(200, data_response_api)
             elif query_params["id"][0] == "6":
                 cursor = cnx.cursor()
-                cursor.execute(
+                label_answer = cursor.execute(
                     """SELECT * FROM answers 
                         WHERE answers.question_id = """
                     + query_params["question"][0]
@@ -653,31 +654,88 @@ class RequestHandler(BaseHTTPRequestHandler):
                         WHERE forms.answer_id = answers.id 
                         AND answers.question_id = """
                     + query_params["question"][0]
-                    + """ 
-                        ORDER BY forms.last_updated"""
+                    + """"""
                 )
                 res_data_answer = cursor.fetchall()
+                times_series = pd.DataFrame()
                 times_series = pd.DataFrame({
                     "date" : [t[2] for t in res_data_answer],
                     "data" : [t for t in res_data_answer]
                 })
                 result = times_series.groupby(times_series['date'].dt.isocalendar().week).apply(lambda x: x[['date', 'data']].to_dict(orient='records')).to_dict()
                 for j in result:
-                    times.append(result[j][0]['date'])
+                    times.append(pd.to_datetime(result[j][0]['date']))
                     for i in result[j]:
                         value_y[i["data"][4]][len(value_y[i["data"][4]]) - 1] += 1
                     for key, value in value_y.items():
                         value_y[key].append(0)
-                print(value_y, times)
+                for key, value in value_y.items():
+                        value_y[key] = value_y[key][:-1]
+                plt.figure(figsize=(10, 6))
+                colors = ['r', 'g', 'b', 'y']
+                for i in res_label_answer:
+                    plt.plot(times, value_y[i[1]], marker='o', linestyle='-', color=colors[res_label_answer.index(i)])
+
+                # Format the x-axis as dates
+                plt.gca().xaxis.set_major_formatter(mdates.DateFormatter('%Y-%m-%d'))
+                plt.gca().xaxis.set_major_locator(mdates.WeekdayLocator())
+
+                # Add labels and title
+                plt.xlabel('Date')
+                plt.ylabel('Values')
+                cursor.execute(
+                    """SELECT * FROM `questions`
+                            WHERE questions.id =""" + query_params["question"][0]
+                )
+                title_db = cursor.fetchall()
+                title = str(title_db[0][0]) + ', ' + title_db[0][1]
+                plt.title(title)
+
+                # Rotate x-axis labels for better readability
+                plt.gcf().autofmt_xdate()
+                plt.legend(labels=[t[1] for t in res_label_answer])
+
+                # Save the figure to a BytesIO buffer
+                buffer = io.BytesIO()
+                plt.savefig(buffer, format="png", dpi=300, bbox_inches="tight")
+                buffer.seek(0)
+
+                # Convert the buffer to a Base64 string
+                base64_image = base64.b64encode(buffer.read()).decode("utf-8")
+                self._send_response(
+                    200, {"data": "data:image/png;base64," + base64_image}
+                )
+                plt.clf()
+            elif query_params["id"][0] == "7":
+                cursor = cnx.cursor()
+                data_answer = cursor.execute(
+                    """SELECT *, COUNT(forms.answer_id) FROM `forms` JOIN answers 
+                        WHERE forms.answer_id = answers.id 
+                        AND answers.question_id = """+ query_params["question"][0] +
+                    """ AND forms.last_updated BETWEEN '"""
+                    + query_params["year"][0]
+                    + """-01-01 00:00:00' AND '"""
+                    + query_params["year"][0]
+                    + """-12-31 00:00:00'
+                        GROUP BY forms.answer_id"""
+                )
+                res_data_answer = cursor.fetchall()
+                pie_1 = [t[7] for t in res_data_answer]
                 plt.subplot(1, 2, 1)
                 plt.subplots(figsize=(4, 4))
                 plt.pie(
                     pie_1,
                     autopct="%1.1f%%",
                     startangle=90,
-                    colors=["lightblue", "lightgreen", "lightcoral"],
+                    colors=['#ff9999', '#66b3ff', '#99ff99', '#ffcc99'],
                 )
-                plt.title("From where do you derive your income?")
+                cursor.execute(
+                    """SELECT * FROM `questions`
+                            WHERE questions.id =""" + query_params["question"][0]
+                )
+                title_db = cursor.fetchall()
+                title = str(title_db[0][0]) + ', ' + title_db[0][1]
+                plt.title(title[0:30] + '...?')
 
                 plt.tight_layout()
 
@@ -685,7 +743,7 @@ class RequestHandler(BaseHTTPRequestHandler):
                 plt.legend(
                     loc="lower center",
                     bbox_to_anchor=(0.5, -0.2),
-                    labels=[t[4] for t in res_data_answer],
+                    labels=[(t[4][0:30] + ('...?' if len(t[4])>31 else '?')) for t in res_data_answer],
                 )
 
                 # Save the figure to a BytesIO buffer
