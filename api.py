@@ -712,7 +712,7 @@ class RequestHandler(BaseHTTPRequestHandler):
                 plt.gcf().autofmt_xdate()
                 plt.legend(labels=[t[1] for t in res_label_answer], 
                     loc="lower center",
-                    bbox_to_anchor=(0.5, -0.2))
+                    bbox_to_anchor=(0.5, -0.5))
 
                 # Save the figure to a BytesIO buffer
                 buffer = io.BytesIO()
