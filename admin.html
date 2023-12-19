@@ -14,14 +14,26 @@
         <div class="flex mt-5 w-[1320px] justify-between">
             <span class="mt-4 mb-1 w-[15%]">Sinh viên</span>
             <select onchange="typesvid = value; get_chart(fromyear, toyear, typesvid)"
-                class="mt-4 mb-1 w-[30%] border-gray-400 border-solid border rounded px-3 py-1">
+                class="mt-4 mb-1 w-[81.7%] border-gray-400 border-solid border rounded px-3 py-1">
                 <option value="44" selected>First year</option>
                 <option value="45">Second year</option>
                 <option value="46">Third year</option>
                 <option value="47">Four year+</option>
             </select>
-            <span class="mt-4 mb-1 w-[15%]">năm</span>
-            <select onchange="fromyear = value; toyear = value; get_chart(fromyear, toyear, typesvid)"
+        </div>
+        <div class="flex mt-1 w-[1320px] justify-between">
+            <span class="mt-4 mb-1 w-[15%]">Từ năm</span>
+            <select onchange="fromyear = value; get_chart(fromyear, toyear, typesvid)"
+                class="mt-4 mb-1 w-[30%] border-gray-400 border-solid border rounded px-3 py-1">
+                <option value="2018">2018</option>
+                <option value="2019">2019</option>
+                <option value="2020">2020</option>
+                <option value="2021">2021</option>
+                <option value="2022">2022</option>
+                <option value="2023" selected>2023</option>
+            </select>
+            <span class="mt-4 mb-1 w-[15%]">Đến năm</span>
+            <select onchange="toyear = value; get_chart(fromyear, toyear, typesvid)"
                 class="mt-4 mb-1 w-[30%] border-gray-400 border-solid border rounded px-3 py-1">
                 <option value="2018">2018</option>
                 <option value="2019">2019</option>
