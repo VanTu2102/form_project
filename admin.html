@@ -11,15 +11,28 @@
 <body class="bg-gray-200 m-10">
     <div class="p-5 rounded-[10px] justify-center flex flex-col items-center">
         <span class="h-full text-[32px] font-[600] pt-5">DASHBOARD</span>
-        <select onchange="get_fig4(value), get_fig5(value), get_fig10(value)"
-            class="mt-4 mb-1 w-[1090px] border-gray-400 border-solid border rounded px-3 py-1">
-            <option value="2018">2018</option>
-            <option value="2019">2019</option>
-            <option value="2020">2020</option>
-            <option value="2021">2021</option>
-            <option value="2022">2022</option>
-            <option value="2023" selected>2023</option>
-        </select>
+        <div class="flex mt-5 w-[1320px] justify-between">
+            <span class="mt-4 mb-1 w-[15%]">Từ năm</span>
+            <select onchange="fromyear = value; get_chart(fromyear, toyear)"
+                class="mt-4 mb-1 w-[30%] border-gray-400 border-solid border rounded px-3 py-1">
+                <option value="2018">2018</option>
+                <option value="2019">2019</option>
+                <option value="2020">2020</option>
+                <option value="2021">2021</option>
+                <option value="2022">2022</option>
+                <option value="2023" selected>2023</option>
+            </select>
+            <span class="mt-4 mb-1 w-[15%]">Đến năm</span>
+            <select onchange="toyear = value; get_chart(fromyear, toyear)"
+                class="mt-4 mb-1 w-[30%] border-gray-400 border-solid border rounded px-3 py-1">
+                <option value="2018">2018</option>
+                <option value="2019">2019</option>
+                <option value="2020">2020</option>
+                <option value="2021">2021</option>
+                <option value="2022">2022</option>
+                <option value="2023" selected>2023</option>
+            </select>
+        </div>
         <!-- <div class="flex">
             <div class="bg-white m-5 rounded-[10px] py-2 px-4 flex justify-center flex-col items-center">
                 <span class="text-[13px] pb-2 font-[600]">Số lượng người tham gia khảo sát</span>
@@ -95,6 +108,8 @@
     </div>
 
     <script>
+        let fromyear = 2023
+        let toyear = 2023
         function get_fig5(year) {
             fetch('http://127.0.0.1:8000/api/chartsurvey?id=1&year=' + year).then(response => {
                 if (!response.ok) {
@@ -204,8 +219,8 @@
                 });
         }
 
-        function get_fig7(year, question) {
-            fetch('http://127.0.0.1:8000/api/chartsurvey?id=6&year=' + year + '&question=' + question).then(response => {
+        function get_fig7(fromyear, toyear, question) {
+            fetch('http://127.0.0.1:8000/api/chartsurvey?id=6&fromyear=' + fromyear + '&question=' + question + '&toyear=' + toyear).then(response => {
                 if (!response.ok) {
                     throw new Error(`HTTP error! Status: ${response.status}`);
                 }
@@ -224,8 +239,8 @@
                 });
         }
 
-        function get_fig8(year, question) {
-            fetch('http://127.0.0.1:8000/api/chartsurvey?id=7&year=' + year + '&question=' + question).then(response => {
+        function get_fig8(fromyear, toyear, question) {
+            fetch('http://127.0.0.1:8000/api/chartsurvey?id=7&fromyear=' + fromyear + '&question=' + question + '&toyear=' + toyear).then(response => {
                 if (!response.ok) {
                     throw new Error(`HTTP error! Status: ${response.status}`);
                 }
@@ -243,19 +258,21 @@
                     console.error('Fetch error:', error);
                 });
         }
-        get_fig5(2023)
-        for (let i = 2; i < 5; i++) {
-            get_fig7(2023, i)
+        function get_chart(fromyear, toyear) {
+            for (let i = 2; i < 5; i++) {
+                get_fig7(fromyear, toyear, i)
+            }
+            for (let i = 6; i < 9; i++) {
+                get_fig7(fromyear, toyear, i)
+            }
+            get_fig8(fromyear, toyear, 1)
+            get_fig8(fromyear, toyear, 5)
+            get_fig8(fromyear, toyear, 9)
+            get_fig8(fromyear, toyear, 10)
+            get_fig8(fromyear, toyear, 11)
+            get_fig8(fromyear, toyear, 12)
         }
-        for (let i = 6; i < 9; i++) {
-            get_fig7(2023, i)
-        }
-        get_fig8(2023, 1)
-        get_fig8(2023, 5)
-        get_fig8(2023, 9)
-        get_fig8(2023, 10)
-        get_fig8(2023, 11)
-        get_fig8(2023, 12)
+        get_chart(2023, 2023)
     </script>
 </body>
 

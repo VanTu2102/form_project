@@ -653,8 +653,12 @@ class RequestHandler(BaseHTTPRequestHandler):
                     """SELECT * FROM `forms` JOIN answers 
                         WHERE forms.answer_id = answers.id 
                         AND answers.question_id = """
-                    + query_params["question"][0]
-                    + """"""
+                    + query_params["question"][0] +
+                    """ AND forms.last_updated BETWEEN '"""
+                    + query_params["fromyear"][0]
+                    + """-01-01 00:00:00' AND '"""
+                    + query_params["toyear"][0]
+                    + """-12-31 00:00:00'"""
                 )
                 res_data_answer = cursor.fetchall()
                 times_series = pd.DataFrame()
@@ -664,7 +668,7 @@ class RequestHandler(BaseHTTPRequestHandler):
                 })
                 result = times_series.groupby(times_series['date'].dt.isocalendar().week).apply(lambda x: x[['date', 'data']].to_dict(orient='records')).to_dict()
                 for j in result:
-                    times.append(pd.to_datetime(result[j][0]['date']))
+                    times.append(pd.to_datetime(result[j][0]['date']) if len(times) == 0 else times[-1] + timedelta(days=7))
                     for i in result[j]:
                         value_y[i["data"][4]][len(value_y[i["data"][4]]) - 1] += 1
                     for key, value in value_y.items():
@@ -678,7 +682,8 @@ class RequestHandler(BaseHTTPRequestHandler):
 
                 # Format the x-axis as dates
                 plt.gca().xaxis.set_major_formatter(mdates.DateFormatter('%Y-%m-%d'))
-                plt.gca().xaxis.set_major_locator(mdates.WeekdayLocator())
+                # plt.gca().xaxis.set_major_locator(mdates.drange(times[0], times[-1], 7))
+                plt.xticks(times, rotation=45, ha="right")
 
                 # Add labels and title
                 plt.xlabel('Date')
@@ -713,9 +718,9 @@ class RequestHandler(BaseHTTPRequestHandler):
                         WHERE forms.answer_id = answers.id 
                         AND answers.question_id = """+ query_params["question"][0] +
                     """ AND forms.last_updated BETWEEN '"""
-                    + query_params["year"][0]
+                    + query_params["fromyear"][0]
                     + """-01-01 00:00:00' AND '"""
-                    + query_params["year"][0]
+                    + query_params["toyear"][0]
                     + """-12-31 00:00:00'
                         GROUP BY forms.answer_id"""
                 )
