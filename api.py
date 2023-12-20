@@ -678,9 +678,10 @@ class RequestHandler(BaseHTTPRequestHandler):
                     "date" : [t[2] for t in res_data_answer],
                     "data" : [t for t in res_data_answer]
                 })
+                times_series = times_series.sort_values(by='date').reset_index(drop=True)
                 result = times_series.groupby(times_series['date'].dt.isocalendar().week).apply(lambda x: x[['date', 'data']].to_dict(orient='records')).to_dict()
                 for j in result:
-                    times.append(pd.to_datetime(result[j][0]['date']) if len(times) == 0 else times[-1] + timedelta(days=7))
+                    times.append(min(pd.to_datetime(times_series['date'])) - timedelta(days=30) if len(times) == 0 else times[-1] + timedelta(days=7))
                     for i in result[j]:
                         value_y[i["data"][4]][len(value_y[i["data"][4]]) - 1] += 1
                     for key, value in value_y.items():
@@ -693,9 +694,9 @@ class RequestHandler(BaseHTTPRequestHandler):
                     plt.plot(times, value_y[i[1]], marker='o', linestyle='-', color=colors[res_label_answer.index(i)])
 
                 # Format the x-axis as dates
-                plt.gca().xaxis.set_major_formatter(mdates.DateFormatter('%Y-%m-%d'))
-                # plt.gca().xaxis.set_major_locator(mdates.drange(times[0], times[-1], 7))
                 plt.xticks(times, rotation=45, ha="right")
+                plt.gca().xaxis.set_major_formatter(mdates.DateFormatter('%Y'))
+                plt.gca().xaxis.set_major_locator(mdates.YearLocator())
 
                 # Add labels and title
                 plt.xlabel('Date')
