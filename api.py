@@ -681,7 +681,7 @@ class RequestHandler(BaseHTTPRequestHandler):
                 times_series = times_series.sort_values(by='date').reset_index(drop=True)
                 result = times_series.groupby(times_series['date'].dt.isocalendar().week).apply(lambda x: x[['date', 'data']].to_dict(orient='records')).to_dict()
                 for j in result:
-                    times.append(min(pd.to_datetime(times_series['date'])) - timedelta(days=30) if len(times) == 0 else times[-1] + timedelta(days=7))
+                    times.append(min(pd.to_datetime(times_series['date'])) if len(times) == 0 else times[-1] + timedelta(days=7))
                     for i in result[j]:
                         value_y[i["data"][4]][len(value_y[i["data"][4]]) - 1] += 1
                     for key, value in value_y.items():
@@ -695,7 +695,7 @@ class RequestHandler(BaseHTTPRequestHandler):
 
                 # Format the x-axis as dates
                 plt.xticks(times, rotation=45, ha="right")
-                plt.gca().xaxis.set_major_formatter(mdates.DateFormatter('%Y'))
+                plt.gca().xaxis.set_major_formatter(mdates.DateFormatter('%Y-%m'))
                 plt.gca().xaxis.set_major_locator(mdates.YearLocator())
 
                 # Add labels and title
